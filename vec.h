@@ -11,6 +11,8 @@ public:
 	float getX();
 	float getY();
 
+	void set(const Vec other);
+
 	void glVertex(); 
 
 	Vec rotated(const float angle) const;
@@ -18,6 +20,8 @@ public:
 	Vec operator+(const Vec& other) const; 
 
 	Vec operator*(const float amount) const; 
+
+	float distance(const Vec& other) const;
 
 	void operator+=(const Vec& other); 
 };

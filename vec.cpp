@@ -14,6 +14,11 @@ float Vec::getY() {
 	return y;
 }
 
+void Vec::set(Vec other) {
+	this->x = other.x;
+	this->y = other.y;
+}
+
 Vec Vec::rotated(const float angle) const {
 	return Vec(
 			x*cos(angle) - y*sin(angle), 
@@ -26,6 +31,10 @@ Vec Vec::operator+(const Vec& other) const {
 
 Vec Vec::operator*(const float amount) const {
 	return Vec(x*amount, y*amount);
+}
+
+float Vec::distance(const Vec& other) const {
+	return sqrt(pow(x - other.x, 2) + pow(y - other.y, 2));
 }
 
 void Vec::operator+=(const Vec& other) {
