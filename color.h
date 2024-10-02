@@ -1,6 +1,8 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include <iostream>
+
 class Color {
 private:
     float r, g, b;
@@ -11,6 +13,8 @@ public:
 
     // Set the OpenGL color
     void glColor() const;
+
+		friend std::ostream& operator<<(std::ostream& os, const Color& c);
 
     // Preset colors
     static const Color Red;

@@ -5,6 +5,7 @@
 #include "color.h"
 #include "vec.h"
 #include <GL/gl.h>
+#include <iostream>
 
 
 float lerp(float p1, float p2, float t) {
@@ -25,7 +26,10 @@ private:
 
 public:
 	Bezier(Vec p1, Vec p2, Vec p3, Vec p4, Color c)
-	: p1(p1), p2(p2), p3(p3), p4(p4), color(c){}
+	: p1(p1), p2(p2), p3(p3), p4(p4), color(c) {
+		std::cout << c << std::endl;
+		std::cout << "aaaaaaaaaaaaaaaaaaaaaaa" << std::endl;
+	}
 
 	Vec at(float t) {
 		Vec p5 = lerpVec(p1, p2, t);
@@ -39,9 +43,8 @@ public:
 		return final;
 	}
 
-	void draw() {
-		color.glColor();
-		glPointSize(4);
+	void draw(const Color c) {
+		c.glColor();
 
 		glBegin(GL_LINE_STRIP);
 
@@ -55,6 +58,17 @@ public:
 		p4.glVertex();
 
 		glEnd();
+	}
+
+	void draw() {
+		draw(this->color);
+	}
+
+	Vec getStartPoint() {
+		return this->p1;
+	}
+	Vec getEndPoint() {
+		return this->p4;
 	}
 };
 

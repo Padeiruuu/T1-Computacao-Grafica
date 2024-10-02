@@ -24,6 +24,10 @@ public:
 	float distance(const Vec& other) const;
 
 	void operator+=(const Vec& other); 
+
+	bool operator==(const Vec& other) const;
+	
+	bool operator!=(const Vec& other) const;
 };
 
 

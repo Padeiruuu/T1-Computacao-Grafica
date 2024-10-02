@@ -41,3 +41,13 @@ void Vec::operator+=(const Vec& other) {
 	x += other.x;
 	y += other.y;
 }
+
+
+bool Vec::operator==(const Vec& other) const {
+	return x == other.x && y == other.y;
+}
+
+bool Vec::operator!=(const Vec& other) const {
+	return !(*this == other);
+}
+

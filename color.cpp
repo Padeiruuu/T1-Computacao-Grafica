@@ -1,11 +1,17 @@
 #include "color.h"
 
 #include <GL/glut.h>
+#include <ostream>
 
 Color::Color(float r, float g, float b) : r(r), g(g), b(b) {}
 
 void Color::glColor() const {
     glColor3f(r, g, b);
+}
+
+std::ostream& operator<<(std::ostream& os, const Color& c) {
+	os << "r: " << c.r << " g: " << c.g << " b: " << c.b;
+	return os;
 }
 
 const Color Color::Red = Color(1.0f, 0.0f, 0.0f);
