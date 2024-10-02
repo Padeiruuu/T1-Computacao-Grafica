@@ -32,16 +32,12 @@ T pickRandomItem(const std::vector<T>& vec) {
         throw out_of_range("Vector is empty!");
     }
 
-    // Seed the random generator
-    mt19937 rng(static_cast<unsigned>(time(0)));  // Or use std::random_device
-    // Create a uniform distribution for valid indices
+    mt19937 rng(static_cast<unsigned>(time(0)));
     uniform_int_distribution<size_t> dist(0, vec.size() - 1);
 
-    // Pick a random index and return the corresponding item
     return vec.at(dist(rng));
 }
 
-// Assuming Vec is your point/vector class, and Bezier has getStartPoint() and getEndPoint()
 std::vector<Bezier*> getCurvesAtPoint(const std::vector<Bezier*>& curves, Vec point) {
 	std::vector<Bezier*> result;
 
