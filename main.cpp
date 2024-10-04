@@ -104,7 +104,7 @@ T pickRandomItem(const vector<T>& vec) {
         throw out_of_range("Vector is empty!");
     }
 
-    mt19937 rng(static_cast<unsigned>(time(0)));
+    static mt19937 rng(static_cast<unsigned>(time(0)));
     uniform_int_distribution<size_t> dist(0, vec.size() - 1);
 
     return vec.at(dist(rng));
@@ -124,16 +124,40 @@ vector<Bezier*> getCurvesAtPoint(const vector<Bezier*>& curves, Vec point) {
 
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
-		case 'q': exit(0);
-		case 'a': cout << "pressed A" << endl;
-		case 'd': cout << "pressed d" << endl;
+		case 'q': exit(0); break;
+		case 'a': {
+			auto item = find(available.begin(), available.end(), ball->nextCurve);
+
+			if (item == available.end()) {
+				break;
+			} 
+
+			int index = distance(available.begin(), item);
+
+			ball->nextCurve = available.at((index + 1) % available.size());
+
+		} break;
+		case 'd': {
+			auto item = find(available.begin(), available.end(), ball->nextCurve);
+
+			if (item == available.end()) {
+				break;
+			} 
+
+			int index = distance(available.begin(), item);
+
+			ball->nextCurve = available.at(index == 0 ? available.size()-1 : index-1);
+
+		} break;
 		case 'w': 
-			cout << "ball wants to move forwards" << endl;
 			ball->progressDirection = 1;
+			ball->nextCurve = nullptr;
+			available.clear();
 			break;
 		case 's':
-			cout << "ball wants to move backwards" << endl;
 			ball->progressDirection =-1;
+			ball->nextCurve = nullptr;
+			available.clear();
 			break;
 	}
 }
@@ -240,7 +264,7 @@ int main(int argc, char** argv) {
 	if (points.size() == 0) {
 		return 1;
 	}
-	curves = curvesFromFile("squircle_curves.txt", points);
+	curves = curvesFromFile("squircle_many_curves.txt", points);
 	if (curves.size() == 0) {
 		return 1;
 	}
@@ -250,12 +274,11 @@ int main(int argc, char** argv) {
 	
 
 	ball->onRequestCurve = [](int direction) -> Bezier* {
-		cout << "Ball wants new curve!" << endl;
-		cout << "Ball is moving: " << direction << endl;
 		available = getCurvesAtPoint(curves, ball->getEnd());
-		auto curve = pickRandomItem(available);
-	
-		return curve;
+		available.erase(remove_if( available.begin(), available.end(), 
+					[](const Bezier* curr) { return curr == ball->curve; }));
+
+		return available.at(0);
 	};
 
 
