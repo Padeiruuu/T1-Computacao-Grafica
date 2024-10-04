@@ -16,6 +16,7 @@ std::ostream& operator<<(std::ostream& os, const Color& c) {
 
 const Color Color::Red = Color(1.0f, 0.0f, 0.0f);
 const Color Color::Green = Color(0.0f, 1.0f, 0.0f);
+const Color Color::DarkGreen = Color(0.0f, 0.4f, 0.0f);
 const Color Color::Blue = Color(0.0f, 0.0f, 1.0f);
 const Color Color::Cyan = Color(0.0f, 1.0f, 1.0f);
 const Color Color::Magenta = Color(1.0f, 0.0f, 1.0f);

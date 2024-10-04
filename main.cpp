@@ -1,3 +1,4 @@
+#include <GL/freeglut_std.h>
 #include <GL/gl.h>
 #include <algorithm>
 #include <cstdlib>
@@ -84,7 +85,7 @@ vector<Bezier*> curvesFromFile(const string& filename, vector<Vec> points) {
 					points.at(p2), 
 					points.at(p3), 
 					points.at(p4), 
-					Color::Red));
+					Color::Black));
 	}
 
 	if (file.bad()) {
@@ -112,23 +113,28 @@ T pickRandomItem(const vector<T>& vec) {
 vector<Bezier*> getCurvesAtPoint(const vector<Bezier*>& curves, Vec point) {
 	vector<Bezier*> result;
 
-	cout << "--------------------" << endl;
-
 	for (auto curve : curves) {
 		if (curve->getStartPoint() == point || curve->getEndPoint() == point) {
 			result.push_back(curve);
-			cout << curve << endl;
 		}
 	}
-
-
 
 	return result;
 }
 
-void keyboard(int key, int x, int y) {
+void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 		case 'q': exit(0);
+		case 'a': cout << "pressed A" << endl;
+		case 'd': cout << "pressed d" << endl;
+		case 'w': 
+			cout << "ball wants to move forwards" << endl;
+			ball->progressDirection = 1;
+			break;
+		case 's':
+			cout << "ball wants to move backwards" << endl;
+			ball->progressDirection =-1;
+			break;
 	}
 }
 
@@ -198,8 +204,7 @@ void display() {
 
 		if (it != available.end()) {
 			// is available
-			cout << c << " is available" << endl;
-			c->draw(Color::Green);
+			c->draw(Color::DarkGreen);
 		} else {
 			c->draw();
 		}
@@ -217,6 +222,7 @@ void display() {
 		glEnd();
 
 		ball->curve->draw(Color::Yellow);
+		if (ball->nextCurve != nullptr) { ball->nextCurve->draw(Color::Green); }
 	}
 	
 	
@@ -230,20 +236,22 @@ int main(int argc, char** argv) {
 	glutCreateWindow("basic window");
 
 	
-	points = pointsFromFile("points.txt");
+	points = pointsFromFile("squircle_points.txt");
 	if (points.size() == 0) {
 		return 1;
 	}
-	curves = curvesFromFile("curves.txt", points);
+	curves = curvesFromFile("squircle_curves.txt", points);
 	if (curves.size() == 0) {
 		return 1;
 	}
 
 
-	ball = new Ball({0, 0}, 0.3, Color::Green, curves.at(0));
+	ball = new Ball({0, 0}, 0.3, Color::DarkGreen, curves.at(0));
 	
 
 	ball->onRequestCurve = [](int direction) -> Bezier* {
+		cout << "Ball wants new curve!" << endl;
+		cout << "Ball is moving: " << direction << endl;
 		available = getCurvesAtPoint(curves, ball->getEnd());
 		auto curve = pickRandomItem(available);
 	
@@ -253,12 +261,13 @@ int main(int argc, char** argv) {
 
 	glutDisplayFunc(display);
 	glutIdleFunc(update);
-	glutSpecialFunc(keyboard);
+	glutKeyboardFunc(keyboard);
+	// glutSpecialFunc(keyboard);
 	glutMouseFunc(mouse);
 	glutMotionFunc(mouseMove);
 	
 
-	glClearColor(0.2, 0.2, 0.2, 0.2);
+	glClearColor(0.4, 0.4, 0.4, 1);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();

@@ -29,6 +29,7 @@ public:
 	Ball(Vec pos, double radius, Color c, Bezier* curve)
 		: pos(pos), radius(radius), color(c), curve(curve) {
 			progressDirection = 1;
+			nextCurve = nullptr;
 		}
 
 	void update() {
@@ -45,10 +46,13 @@ public:
 				progressDirection = -1;
 			}
 			curve = nextCurve;
+			nextCurve = nullptr;
 		}
 
-		// if we just crossed 50%
-		if (prev < 0.5 && progress > 0.5 && onRequestCurve) {
+		// if ball is moving forward, is halfway and doesn't have a next curve
+		// or is moving backwards
+		if ((progressDirection >= 1 && progress > 0.5 && nextCurve == nullptr)
+			||(progressDirection <=-1 && progress < 0.5 && nextCurve == nullptr)) {
 			nextCurve = onRequestCurve(progressDirection);
 		}
 

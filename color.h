@@ -19,6 +19,7 @@ public:
     // Preset colors
     static const Color Red;
     static const Color Green;
+    static const Color DarkGreen;
     static const Color Blue;
     static const Color Cyan;
     static const Color Magenta;
