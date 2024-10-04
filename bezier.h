@@ -26,10 +26,7 @@ private:
 
 public:
 	Bezier(Vec p1, Vec p2, Vec p3, Vec p4, Color c)
-	: p1(p1), p2(p2), p3(p3), p4(p4), color(c) {
-		std::cout << c << std::endl;
-		std::cout << "aaaaaaaaaaaaaaaaaaaaaaa" << std::endl;
-	}
+	: p1(p1), p2(p2), p3(p3), p4(p4), color(c) { }
 
 	Vec at(float t) {
 		Vec p5 = lerpVec(p1, p2, t);
@@ -44,9 +41,9 @@ public:
 	}
 
 	void draw(const Color c) {
-		c.glColor();
-
 		glBegin(GL_LINE_STRIP);
+
+		c.glColor();
 
 		for (int i = 0; i < 32; i++) {
 			float t = float(i) / 32;

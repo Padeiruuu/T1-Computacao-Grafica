@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <vector>
 #include <stdio.h>
 #include <math.h>
@@ -21,13 +23,82 @@
 
 using namespace std;
 
-vector<Vec> points = { {-0.9,0.9}, {0.9,0.9}, {0.9,-0.9}, {-0.9,-0.9} };
+vector<Vec> points;
 vector<Bezier*> curves;
+
 vector<Bezier*> available;
 Ball* ball = nullptr;
 
+vector<Vec> pointsFromFile(const string& filename) {
+	ifstream file(filename);
+
+	if (!file) {
+		cerr << "Error: Could not open the file " << filename << endl;
+	}
+
+	vector<Vec> points;
+
+	string line;
+	while (getline(file, line)) {
+		istringstream iss(line);
+		float x, y;
+		if (!(iss >> x >> y)) {
+			cerr << "Error: Malformed line: " << line << endl;
+			continue;
+		}
+
+		points.push_back({x, y});
+	}
+
+	if (file.bad()) {
+		cerr << "Error: Something went wrong while reading the file." << endl;
+	}
+
+	file.close();
+
+
+	return points;
+}
+
+vector<Bezier*> curvesFromFile(const string& filename, vector<Vec> points) {
+	ifstream file(filename);
+
+	if (!file) {
+		cerr << "Error: Could not open the file " << filename << endl;
+	}
+
+	vector<Bezier*> curves;
+
+	string line;
+	while (getline(file, line)) {
+		istringstream iss(line);
+		int p1, p2, p3, p4;
+
+		if (!(iss >> p1 >> p2 >> p3 >> p4)) {
+			cerr << "Error: Malformed line: " << line << endl;
+			continue;
+		}
+
+		curves.push_back(new Bezier(
+					points.at(p1), 
+					points.at(p2), 
+					points.at(p3), 
+					points.at(p4), 
+					Color::Red));
+	}
+
+	if (file.bad()) {
+		cerr << "Error: Something went wrong while reading the file." << endl;
+	}
+
+	file.close();
+
+
+	return curves;
+}
+
 template<typename T>
-T pickRandomItem(const std::vector<T>& vec) {
+T pickRandomItem(const vector<T>& vec) {
     if (vec.empty()) {
         throw out_of_range("Vector is empty!");
     }
@@ -38,14 +109,19 @@ T pickRandomItem(const std::vector<T>& vec) {
     return vec.at(dist(rng));
 }
 
-std::vector<Bezier*> getCurvesAtPoint(const std::vector<Bezier*>& curves, Vec point) {
-	std::vector<Bezier*> result;
+vector<Bezier*> getCurvesAtPoint(const vector<Bezier*>& curves, Vec point) {
+	vector<Bezier*> result;
+
+	cout << "--------------------" << endl;
 
 	for (auto curve : curves) {
 		if (curve->getStartPoint() == point || curve->getEndPoint() == point) {
 			result.push_back(curve);
+			cout << curve << endl;
 		}
 	}
+
+
 
 	return result;
 }
@@ -122,7 +198,8 @@ void display() {
 
 		if (it != available.end()) {
 			// is available
-			c->draw(Color::Yellow);
+			cout << c << " is available" << endl;
+			c->draw(Color::Green);
 		} else {
 			c->draw();
 		}
@@ -133,11 +210,13 @@ void display() {
 
 		glBegin(GL_POINTS);
 
-		Color::Red.glColor();
+		Color::Yellow.glColor();
 
 		ball->getEnd().glVertex();
 
 		glEnd();
+
+		ball->curve->draw(Color::Yellow);
 	}
 	
 	
@@ -147,32 +226,30 @@ void display() {
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-	glutInitWindowSize(500, 500);
+	glutInitWindowSize(1000, 1000);
 	glutCreateWindow("basic window");
 
-	curves = {
-		// new Bezier(points.at(0), points.at(2), points.at(3), points.at(1), Color::Blue),
-		new Bezier(points.at(0), points.at(1), points.at(2), points.at(3), Color::Blue),
+	
+	points = pointsFromFile("points.txt");
+	if (points.size() == 0) {
+		return 1;
+	}
+	curves = curvesFromFile("curves.txt", points);
+	if (curves.size() == 0) {
+		return 1;
+	}
 
-		new Bezier(points.at(1), points.at(2), points.at(3), points.at(0), Color::Blue),
-		// new Bezier(points.at(1), points.at(3), points.at(0), points.at(2), Color::Blue),
 
-		new Bezier(points.at(2), points.at(3), points.at(0), points.at(1), Color::Blue),
-		// new Bezier(points.at(2), points.at(0), points.at(1), points.at(3), Color::Blue),
-
-		// new Bezier(points.at(3), points.at(1), points.at(2), points.at(0), Color::Blue),
-		new Bezier(points.at(3), points.at(0), points.at(1), points.at(2), Color::Blue),
-	};
-
-	ball = new Ball({0, 0}, 0.03, Color::Green, curves.at(0));
+	ball = new Ball({0, 0}, 0.3, Color::Green, curves.at(0));
 	
 
 	ball->onRequestCurve = [](int direction) -> Bezier* {
-		auto avaliable = getCurvesAtPoint(curves, ball->getEnd());
-		auto curve = pickRandomItem(avaliable);
+		available = getCurvesAtPoint(curves, ball->getEnd());
+		auto curve = pickRandomItem(available);
 	
 		return curve;
 	};
+
 
 	glutDisplayFunc(display);
 	glutIdleFunc(update);
@@ -182,6 +259,13 @@ int main(int argc, char** argv) {
 	
 
 	glClearColor(0.2, 0.2, 0.2, 0.2);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(-15, 15, -15, 15, -1.0, 1.0);
+
+	// Switch back to the modelview matrix
+	glMatrixMode(GL_MODELVIEW);
 
 	glutMainLoop();
 

@@ -1,3 +1,4 @@
+
 main: main.cpp color.o vec.o ball.h bezier.h
 	g++ -o main -lGL -lGLU -lglut -lm main.cpp color.o vec.o ball.h bezier.h
 
@@ -12,3 +13,10 @@ ball.o: ball.h vec.o bezier.o
 
 bezier.o: bezier.h vec.o
 	g++ -c -lGL -lGLU -lglut bezier.h vec.o -lm
+
+
+
+
+arquivos: gera_arquivos.py
+	python gera_arquivos.py
+

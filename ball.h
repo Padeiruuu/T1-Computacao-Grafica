@@ -14,8 +14,9 @@
 using namespace std;
 
 #define BALL_FACES 24
+#define BALL_SPEED 0.01
 class Ball {
-private:
+public: 
 	Vec pos;
 	double radius;
 	Color color;
@@ -23,9 +24,8 @@ private:
 	Bezier* nextCurve;
 	float progress;
 	int progressDirection;
-public: function<Bezier*(int)> onRequestCurve;
+	function<Bezier*(int)> onRequestCurve;
 
-public:
 	Ball(Vec pos, double radius, Color c, Bezier* curve)
 		: pos(pos), radius(radius), color(c), curve(curve) {
 			progressDirection = 1;
@@ -33,7 +33,7 @@ public:
 
 	void update() {
 		float prev = progress;
-		progress += 0.01 * progressDirection;
+		progress += BALL_SPEED * progressDirection;
 		
 		if (progress > 1 || progress < 0) {
 			// we end on the next curve start
