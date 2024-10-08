@@ -24,7 +24,7 @@
 
 using namespace std;
 
-#define ENEMIES 4
+#define ENEMIES 0
 
 vector<Vec> points;
 vector<Bezier*> curves;
@@ -297,15 +297,15 @@ void display() {
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-	glutInitWindowSize(1000, 1000);
+	glutInitWindowSize(250, 250);
 	glutCreateWindow("basic window");
 
 	
-	points = pointsFromFile("squircle_points.txt");
+	points = pointsFromFile("points.txt");
 	if (points.size() == 0) {
 		return 1;
 	}
-	curves = curvesFromFile("squircle_many_curves.txt", points);
+	curves = curvesFromFile("curves.txt", points);
 	if (curves.size() == 0) {
 		return 1;
 	}
