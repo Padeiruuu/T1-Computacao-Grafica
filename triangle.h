@@ -43,12 +43,12 @@ public:
             if (nextCurve && getEnd() == nextCurve->getStartPoint()) { 
                 progress = 0;
                 progressDirection = 1;
-                curve = nextCurve;
-                nextCurve = nullptr;
             } else {
-                progress = (progress > 1) ? 1 : 0;
-                progressDirection = (progressDirection == 1) ? -1 : 1;
+                progress = 1;
+                progressDirection = -1;
             }
+            curve = nextCurve;
+            nextCurve = nullptr;
         }
         // if ball is moving forward, is halfway and doesn't have a next curve
 		// or is moving backwards
