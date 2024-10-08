@@ -150,7 +150,7 @@ void makeEnemies() {
 
 bool shouldStop() {
 	for (auto enemy : enemies) {
-		if (enemy->pos.distance(player->pos) < 0.1) {
+		if (enemy->pos.distance(player->pos) < player->radius*2) {
 			return true;
 		}
 	}
@@ -158,7 +158,7 @@ bool shouldStop() {
 }
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
-		case 'q': exit(0); break;
+		// case 'q': exit(0); break;
 		case 'a': {
 			auto item = find(available.begin(), available.end(), player->nextCurve);
 
@@ -183,18 +183,14 @@ void keyboard(unsigned char key, int x, int y) {
 			player->nextCurve = available.at(index == 0 ? available.size()-1 : index-1);
 
 		} break;
-		case 'w': 
-			player->progressDirection = 1;
-			player->nextCurve = nullptr;
-			available.clear();
-			break;
-		case 's':
-			player->progressDirection =-1;
+		case 's': case 'w':
+			player->progressDirection *= -1;
 			player->nextCurve = nullptr;
 			available.clear();
 			break;
 	}
 }
+
 
 void mouse(int button, int up, int x, int y) {
 	/*
@@ -240,7 +236,7 @@ void update() {
 		if (player) player->update();
 		
 		if (shouldStop()) {
-			exit(69);
+			exit(42069);
 		}
 
 		for (auto enemy : enemies) {
