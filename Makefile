@@ -11,7 +11,7 @@ TARGET = main
 SOURCES = main.cpp color.cpp vec.cpp
 
 # Arquivos de cabeçalho
-HEADERS = ball.h bezier.h color.h vec.h
+HEADERS = triangle.h bezier.h color.h vec.h
 
 # Compila o executável
 all: $(TARGET)

@@ -16,7 +16,7 @@
 #include <GL/glut.h>
 #include <GL/glu.h>
 
-#include "ball.h"
+#include "triangle.h"
 #include "bezier.h"
 #include "color.h"
 #include "vec.h"
@@ -24,15 +24,14 @@
 
 using namespace std;
 
-#define ENEMIES 5
+#define ENEMIES 4
 
 vector<Vec> points;
 vector<Bezier*> curves;
-vector<Ball*> enemies;
+vector<Triangle*> enemies;
 
 vector<Bezier*> available;
-Ball* player = nullptr;
-
+Triangle* player = nullptr;
 
 template<typename T>
 T pickRandomItem(const vector<T>& vec) {
@@ -128,23 +127,23 @@ vector<Bezier*> curvesFromFile(const string& filename, vector<Vec> points) {
 }
 
 void makeEnemies() {
-	// auIto enemies = vector<Ball*>();
+	// auIto enemies = vector<Triangle*>(); 
 
 	for (int i = 0; i < ENEMIES; i++) {
 		auto curve = pickRandomItem(curves);
-		Ball* ball = new Ball(curve->at(0.5), 1, Color::Red, curve);
+		Triangle* triangle = new Triangle(curve->at(0.5), 1, Color::Red, curve);
 
-		ball->progress = 0.5;
+		triangle->progress = 0.5;
 		if (i % 2 == 1) { 
-			ball->progressDirection = -1;
+			triangle->progressDirection = -1;
 		}
 
-		ball->onRequestCurve = [ball](int direction) {
-			auto available = getCurvesAtPoint(curves, ball->getEnd());
+		triangle->onRequestCurve = [triangle](int direction) {
+			auto available = getCurvesAtPoint(curves, triangle->getEnd());
 			return pickRandomItem(available);
 		};
 
-		enemies.push_back(ball);
+		enemies.push_back(triangle);
 	}
 }
 
@@ -204,8 +203,8 @@ void mouse(int button, int up, int x, int y) {
 			points.clear();
 			points.push_back(last);
 
-			if (!ball) {
-				ball = new Ball({0,0}, 0.1, Color::Magenta, curves.at(0));
+			if (!triangle) {
+				triangle = new Triangle({0,0}, 0.1, Color::Magenta, curves.at(0));
 			}
 		}
 	}	
@@ -313,7 +312,7 @@ int main(int argc, char** argv) {
   makeEnemies();
 
 
-	player = new Ball(curves.at(0)->at(0), 0.3, Color::DarkGreen, curves.at(0));
+	player = new Triangle(curves.at(0)->at(0), 0.3, Color::DarkGreen, curves.at(0));
 	
 
 	player->onRequestCurve = [](int direction) -> Bezier* {

@@ -1,5 +1,5 @@
-#ifndef BALL_H
-#define BALL_H
+#ifndef TRIANGLE_H
+#define TRIANGLE_H
 
 #include <stdio.h>
 #include <math.h>
@@ -13,10 +13,10 @@
 
 using namespace std;
 
-#define BALL_FACES 3
-#define BALL_SPEED 0.004
+#define TRIANGLE_FACES 3
+#define TRIANGLE_SPEED 0.004
 
-class Ball {
+class Triangle {
 public: 
     Vec pos;
     double radius;
@@ -28,7 +28,7 @@ public:
     float angle;
     function<Bezier*(int)> onRequestCurve;
 
-    Ball(Vec pos, double radius, Color c, Bezier* curve)
+    Triangle(Vec pos, double radius, Color c, Bezier* curve)
     : pos(pos), radius(radius), color(c), curve(curve), progress(0), angle(0) {
         progressDirection = 1;
         nextCurve = nullptr;
@@ -36,10 +36,10 @@ public:
 
     void update() {
         float prev = progress;
-        progress += BALL_SPEED * progressDirection;
+        progress += TRIANGLE_SPEED * progressDirection;
 
         if (progress > 1 || progress < 0) {
-			// we end on the next curve start
+            // we end on the next curve start
             if (nextCurve && getEnd() == nextCurve->getStartPoint()) { 
                 progress = 0;
                 progressDirection = 1;
@@ -50,8 +50,8 @@ public:
                 progressDirection = (progressDirection == 1) ? -1 : 1;
             }
         }
-		// if ball is moving forward, is halfway and doesn't have a next curve
-		// or is moving backwards	
+        // if ball is moving forward, is halfway and doesn't have a next curve
+		// or is moving backwards
         if ((progressDirection >= 1 && progress > 0.5 && nextCurve == nullptr) ||
             (progressDirection <= -1 && progress < 0.5 && nextCurve == nullptr)) {
             nextCurve = onRequestCurve(progressDirection);
@@ -78,23 +78,23 @@ public:
     }
 
     void draw() {
-        glPushMatrix(); // Salvar o estado atual da matriz
+        glPushMatrix();
 
-        glTranslatef(pos.getX(), pos.getY(), 0); // Transladar para a posição do triângulo
-        glRotatef(angle, 0, 0, 1); // Rotacionar ao redor do eixo Z
+        glTranslatef(pos.getX(), pos.getY(), 0);
+        glRotatef(angle, 0, 0, 1);
 
-        glBegin(GL_POLYGON);
+        glBegin(GL_TRIANGLES);
             color.glColor();
-            for (int i = 0; i < BALL_FACES; i++) {
+            for (int i = 0; i < TRIANGLE_FACES; i++) {
                 Vec v = Vec(
-                    cos(i / static_cast<float>(BALL_FACES) * M_PI * 2) * radius, 
-                    sin(i / static_cast<float>(BALL_FACES) * M_PI * 2) * radius);
+                    cos(i / static_cast<float>(TRIANGLE_FACES) * M_PI * 2) * radius, 
+                    sin(i / static_cast<float>(TRIANGLE_FACES) * M_PI * 2) * radius);
                 v.glVertex();
             }
         glEnd(); 
 
-        glPopMatrix(); // Restaurar o estado da matriz
+        glPopMatrix();
     }
 };
 
-#endif // BALL_H
+#endif // TRIANGLE_H
