@@ -14,6 +14,8 @@ public:
     // Set the OpenGL color
     void glColor() const;
 
+		static Color randomColor();
+
 		friend std::ostream& operator<<(std::ostream& os, const Color& c);
 
     // Preset colors

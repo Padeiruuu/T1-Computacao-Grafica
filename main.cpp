@@ -24,7 +24,7 @@
 
 using namespace std;
 
-#define ENEMIES 0
+#define ENEMIES 10
 
 vector<Vec> points;
 vector<Bezier*> curves;
@@ -131,7 +131,7 @@ void makeEnemies() {
 
 	for (int i = 0; i < ENEMIES; i++) {
 		auto curve = pickRandomItem(curves);
-		Triangle* triangle = new Triangle(curve->at(0.5), 1, Color::Red, curve);
+		Triangle* triangle = new Triangle(curve->at(0.5), 0.5, Color::randomColor(), curve);
 
 		triangle->progress = 0.5;
 		if (i % 2 == 1) { 
@@ -149,7 +149,7 @@ void makeEnemies() {
 
 bool shouldStop() {
 	for (auto enemy : enemies) {
-		if (enemy->pos.distance(player->pos) < player->radius*2) {
+		if (enemy->pos.distance(player->pos) < player->radius) {
 			return true;
 		}
 	}
@@ -158,6 +158,9 @@ bool shouldStop() {
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 		// case 'q': exit(0); break;
+		case ' ': {
+			player->running = !player->running;
+		} break;
 		case 'a': {
 			auto item = find(available.begin(), available.end(), player->nextCurve);
 
@@ -272,8 +275,6 @@ void display() {
 	}
 
 	if (player) {
-		player->draw();
-
 		glBegin(GL_POINTS);
 
 		Color::Yellow.glColor();
@@ -284,6 +285,8 @@ void display() {
 
 		player->curve->draw(Color::Yellow);
 		if (player->nextCurve != nullptr) { player->nextCurve->draw(Color::Green); }
+			
+		player->draw();
 	}
 
 	for (auto enemy : enemies) {
@@ -297,7 +300,7 @@ void display() {
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-	glutInitWindowSize(250, 250);
+	glutInitWindowSize(1000, 1000);
 	glutCreateWindow("basic window");
 
 	
@@ -336,7 +339,7 @@ int main(int argc, char** argv) {
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-15, 15, -15, 15, -1.0, 1.0);
+	glOrtho(-12, 12, -12, 12, -1.0, 1.0);
 
 	// Switch back to the modelview matrix
 	glMatrixMode(GL_MODELVIEW);

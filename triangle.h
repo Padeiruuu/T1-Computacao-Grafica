@@ -26,15 +26,20 @@ public:
     float progress;
     int progressDirection;
     float angle;
+		bool running;
     function<Bezier*(int)> onRequestCurve;
 
     Triangle(Vec pos, double radius, Color c, Bezier* curve)
     : pos(pos), radius(radius), color(c), curve(curve), progress(0), angle(0) {
         progressDirection = 1;
         nextCurve = nullptr;
+				running = true;
     }
 
     void update() {
+				if (!running) {
+					return;
+				}
         float prev = progress;
         progress += TRIANGLE_SPEED * progressDirection;
 
