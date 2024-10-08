@@ -1,22 +1,24 @@
+# Nome do compilador
+CXX = g++
 
-main: main.cpp color.o vec.o ball.h bezier.h
-	g++ -o main -lGL -lGLU -lglut -lm main.cpp color.o vec.o ball.h bezier.h
+# Flags de compilação
+CXXFLAGS = -Wall -g
 
-color.o: color.cpp
-	g++ -c -lGL -lGLU -lglut color.cpp
+# Nome do executável
+TARGET = main
 
-vec.o: vec.cpp
-	g++ -c -lGL -lGLU -lglut vec.cpp -lm
+# Lista de arquivos fonte
+SOURCES = main.cpp color.cpp vec.cpp
 
-ball.o: ball.h vec.o bezier.o
-	g++ -c -lGL -lGLU -lglut ball.h vec.o bezier.o -lm
+# Arquivos de cabeçalho
+HEADERS = ball.h bezier.h color.h vec.h
 
-bezier.o: bezier.h vec.o
-	g++ -c -lGL -lGLU -lglut bezier.h vec.o -lm
+# Compila o executável
+all: $(TARGET)
 
+$(TARGET): $(SOURCES) $(HEADERS)
+	$(CXX) $(SOURCES) -o $(TARGET) $(CXXFLAGS) -lGL -lGLU -lglut
 
-
-
-arquivos: gera_arquivos.py
-	python gera_arquivos.py
-
+# Limpa arquivos gerados
+clean:
+	rm -f $(TARGET)

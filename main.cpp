@@ -24,7 +24,7 @@
 
 using namespace std;
 
-#define ENEMIES 7
+#define ENEMIES 5
 
 vector<Vec> points;
 vector<Bezier*> curves;
