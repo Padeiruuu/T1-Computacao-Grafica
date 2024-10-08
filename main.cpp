@@ -24,11 +24,40 @@
 
 using namespace std;
 
+#define ENEMIES 7
+
 vector<Vec> points;
 vector<Bezier*> curves;
+vector<Ball*> enemies;
 
 vector<Bezier*> available;
-Ball* ball = nullptr;
+Ball* player = nullptr;
+
+
+template<typename T>
+T pickRandomItem(const vector<T>& vec) {
+    if (vec.empty()) {
+        throw out_of_range("Vector is empty!");
+    }
+
+    static mt19937 rng(static_cast<unsigned>(time(0)));
+    uniform_int_distribution<size_t> dist(0, vec.size() - 1);
+
+    return vec.at(dist(rng));
+}
+
+vector<Bezier*> getCurvesAtPoint(const vector<Bezier*>& curves, Vec point) {
+	vector<Bezier*> result;
+
+	for (auto curve : curves) {
+		if (curve->getStartPoint() == point || curve->getEndPoint() == point) {
+			result.push_back(curve);
+		}
+	}
+
+	return result;
+}
+
 
 vector<Vec> pointsFromFile(const string& filename) {
 	ifstream file(filename);
@@ -98,35 +127,40 @@ vector<Bezier*> curvesFromFile(const string& filename, vector<Vec> points) {
 	return curves;
 }
 
-template<typename T>
-T pickRandomItem(const vector<T>& vec) {
-    if (vec.empty()) {
-        throw out_of_range("Vector is empty!");
-    }
+void makeEnemies() {
+	// auIto enemies = vector<Ball*>();
 
-    static mt19937 rng(static_cast<unsigned>(time(0)));
-    uniform_int_distribution<size_t> dist(0, vec.size() - 1);
+	for (int i = 0; i < ENEMIES; i++) {
+		auto curve = pickRandomItem(curves);
+		Ball* ball = new Ball(curve->at(0.5), 1, Color::Red, curve);
 
-    return vec.at(dist(rng));
+		ball->progress = 0.5;
+		if (i % 2 == 1) { 
+			ball->progressDirection = -1;
+		}
+
+		ball->onRequestCurve = [ball](int direction) {
+			auto available = getCurvesAtPoint(curves, ball->getEnd());
+			return pickRandomItem(available);
+		};
+
+		enemies.push_back(ball);
+	}
 }
 
-vector<Bezier*> getCurvesAtPoint(const vector<Bezier*>& curves, Vec point) {
-	vector<Bezier*> result;
-
-	for (auto curve : curves) {
-		if (curve->getStartPoint() == point || curve->getEndPoint() == point) {
-			result.push_back(curve);
+bool shouldStop() {
+	for (auto enemy : enemies) {
+		if (enemy->pos.distance(player->pos) < 0.1) {
+			return true;
 		}
 	}
-
-	return result;
+	return false;
 }
-
 void keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 		case 'q': exit(0); break;
 		case 'a': {
-			auto item = find(available.begin(), available.end(), ball->nextCurve);
+			auto item = find(available.begin(), available.end(), player->nextCurve);
 
 			if (item == available.end()) {
 				break;
@@ -134,11 +168,11 @@ void keyboard(unsigned char key, int x, int y) {
 
 			int index = distance(available.begin(), item);
 
-			ball->nextCurve = available.at((index + 1) % available.size());
+			player->nextCurve = available.at((index + 1) % available.size());
 
 		} break;
 		case 'd': {
-			auto item = find(available.begin(), available.end(), ball->nextCurve);
+			auto item = find(available.begin(), available.end(), player->nextCurve);
 
 			if (item == available.end()) {
 				break;
@@ -146,17 +180,17 @@ void keyboard(unsigned char key, int x, int y) {
 
 			int index = distance(available.begin(), item);
 
-			ball->nextCurve = available.at(index == 0 ? available.size()-1 : index-1);
+			player->nextCurve = available.at(index == 0 ? available.size()-1 : index-1);
 
 		} break;
 		case 'w': 
-			ball->progressDirection = 1;
-			ball->nextCurve = nullptr;
+			player->progressDirection = 1;
+			player->nextCurve = nullptr;
 			available.clear();
 			break;
 		case 's':
-			ball->progressDirection =-1;
-			ball->nextCurve = nullptr;
+			player->progressDirection =-1;
+			player->nextCurve = nullptr;
 			available.clear();
 			break;
 	}
@@ -198,17 +232,25 @@ void update() {
 	last = end_time;
 	accDt += dt;
 
-	if (accDt > 1.0/30) {
+	if (accDt > 1.0/60) {
 		accDt = 0;
 
 		// update stuff
 
-		if (ball) ball->update();
+		if (player) player->update();
 		
+		if (shouldStop()) {
+			exit(69);
+		}
+
+		for (auto enemy : enemies) {
+			enemy->update();
+		}
 		// end update
 		
 		glutPostRedisplay();
 	}
+
 }
 
 
@@ -234,19 +276,23 @@ void display() {
 		}
 	}
 
-	if (ball) {
-		ball->draw();
+	if (player) {
+		player->draw();
 
 		glBegin(GL_POINTS);
 
 		Color::Yellow.glColor();
 
-		ball->getEnd().glVertex();
+		player->getEnd().glVertex();
 
 		glEnd();
 
-		ball->curve->draw(Color::Yellow);
-		if (ball->nextCurve != nullptr) { ball->nextCurve->draw(Color::Green); }
+		player->curve->draw(Color::Yellow);
+		if (player->nextCurve != nullptr) { player->nextCurve->draw(Color::Green); }
+	}
+
+	for (auto enemy : enemies) {
+		enemy->draw();
 	}
 	
 	
@@ -268,15 +314,16 @@ int main(int argc, char** argv) {
 	if (curves.size() == 0) {
 		return 1;
 	}
+  makeEnemies();
 
 
-	ball = new Ball({0, 0}, 0.3, Color::DarkGreen, curves.at(0));
+	player = new Ball(curves.at(0)->at(0), 0.3, Color::DarkGreen, curves.at(0));
 	
 
-	ball->onRequestCurve = [](int direction) -> Bezier* {
-		available = getCurvesAtPoint(curves, ball->getEnd());
+	player->onRequestCurve = [](int direction) -> Bezier* {
+		available = getCurvesAtPoint(curves, player->getEnd());
 		available.erase(remove_if( available.begin(), available.end(), 
-					[](const Bezier* curr) { return curr == ball->curve; }));
+					[](const Bezier* curr) { return curr == player->curve; }));
 
 		return available.at(0);
 	};
