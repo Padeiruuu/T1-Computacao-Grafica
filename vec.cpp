@@ -21,8 +21,8 @@ void Vec::set(Vec other) {
 
 Vec Vec::rotated(const float angle) const {
 	return Vec(
-			x*cos(angle) - y*sin(angle), 
-			x*sin(angle) + y*cos(angle));
+		x*cos(angle) - y*sin(angle), 
+		x*sin(angle) + y*cos(angle));
 }
 
 Vec Vec::operator+(const Vec& other) const {
